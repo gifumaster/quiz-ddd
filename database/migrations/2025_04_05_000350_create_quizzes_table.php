@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('id')->primary();
             $table->text('title')->nullable();
             $table->text('image_url');
-            $table->string('correct_world_id');
+            $table->string('correct_world_id')->nullable();
             $table->timestamps();
         });
     }

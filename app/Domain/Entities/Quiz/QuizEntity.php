@@ -4,22 +4,24 @@ namespace App\Domain\Entities\Quiz;
 
 use App\Domain\Entities\Quiz\ValueObject\QuizId;
 use App\Domain\Entities\Quiz\ValueObject\QuizImageUrl;
+use App\Domain\Entities\Quiz\ValueObject\QuizTitle;
+use App\Domain\Entities\Quiz\ValueObject\CorrectWorldId;
 use DateTime;
 
 readonly class QuizEntity
 {
     public readonly QuizId $id;
-    public readonly ?string $title;
+    public readonly QuizTitle $title;
     public readonly QuizImageUrl $imageUrl;
-    public readonly string $correctWorldId;
+    public readonly ?CorrectWorldId $correctWorldId;
     public readonly ?DateTime $createdAt;
     public readonly ?DateTime $updatedAt;
 
     private function __construct(
         QuizId $id,
-        ?string $title,
+        QuizTitle $title,
         QuizImageUrl $imageUrl,
-        string $correctWorldId,
+        ?CorrectWorldId $correctWorldId,
         ?DateTime $createdAt = null,
         ?DateTime $updatedAt = null
     ) {
@@ -34,13 +36,13 @@ readonly class QuizEntity
     public static function create(
         ?string $title,
         QuizImageUrl $imageUrl,
-        string $correctWorldId,
+        ?string $correctWorldId,
     ): self {
         return new self(
             id: QuizId::generate(),
-            title: $title,
+            title: QuizTitle::from($title),
             imageUrl: $imageUrl,
-            correctWorldId: $correctWorldId,
+            correctWorldId: $correctWorldId !== null ? CorrectWorldId::from($correctWorldId) : null,
             createdAt: new DateTime(),
             updatedAt: new DateTime()
         );
@@ -50,9 +52,9 @@ readonly class QuizEntity
     {
         return [
             'id' => $this->id->value(),
-            'title' => $this->title,
+            'title' => $this->title->value(),
             'image_url' => $this->imageUrl->value(),
-            'correct_world_id' => $this->correctWorldId,
+            'correct_world_id' => $this->correctWorldId?->value(),
             'created_at' => $this->createdAt?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updatedAt?->format('Y-m-d H:i:s'),
         ];
@@ -62,9 +64,9 @@ readonly class QuizEntity
     {
         return new self(
             id: QuizId::from($data['id']),
-            title: $data['title'] ?? null,
+            title: QuizTitle::from($data['title'] ?? null),
             imageUrl: QuizImageUrl::from($data['image_url']),
-            correctWorldId: $data['correct_world_id'],
+            correctWorldId: isset($data['correct_world_id']) ? CorrectWorldId::from($data['correct_world_id']) : null,
             createdAt: isset($data['created_at']) ? new DateTime($data['created_at']) : null,
             updatedAt: isset($data['updated_at']) ? new DateTime($data['updated_at']) : null
         );

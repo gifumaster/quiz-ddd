@@ -6,13 +6,12 @@ use App\Models\Quiz;
 use App\Domain\Entities\Quiz\QuizEntity;
 use App\Domain\Entities\Quiz\ValueObject\QuizId;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 class QuizRepository implements QuizRepositoryInterface
 {
-    public function findById(string $id): ?QuizEntity
+    public function findById(QuizId $id): ?QuizEntity
     {
-        $quiz = Quiz::find($id);
+        $quiz = Quiz::find($id->value());
         return $quiz ? QuizEntity::fromArray($quiz->toArray()) : null;
     }
 
@@ -42,9 +41,9 @@ class QuizRepository implements QuizRepositoryInterface
         return QuizEntity::fromArray($quiz->toArray());
     }
 
-    public function delete(string $id): bool
+    public function delete(QuizId $id): bool
     {
-        $quiz = Quiz::find($id);
+        $quiz = Quiz::find($id->value());
         if (!$quiz) {
             return false;
         }
