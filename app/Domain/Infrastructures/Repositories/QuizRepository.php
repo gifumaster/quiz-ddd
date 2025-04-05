@@ -3,41 +3,48 @@
 namespace App\Domain\Infrastructures\Repositories;
 
 use App\Models\Quiz;
+use App\Domain\Entities\Quiz\QuizEntity;
+use App\Domain\Entities\Quiz\ValueObject\QuizId;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class QuizRepository implements QuizRepositoryInterface
 {
-    public function findById(string $id): ?Quiz
+    public function findById(string $id): ?QuizEntity
     {
-        return Quiz::find($id);
+        $quiz = Quiz::find($id);
+        return $quiz ? QuizEntity::fromArray($quiz->toArray()) : null;
     }
 
     public function getAll(): Collection
     {
-        return Quiz::all();
+        return Quiz::all()->map(fn($quiz) => QuizEntity::fromArray($quiz->toArray()));
     }
 
-    public function create(array $data): Quiz
+    public function create(QuizEntity $entity): QuizEntity
     {
-        $data['id'] = $data['id'] ?? Str::uuid()->toString();
-        return Quiz::create($data);
+        $data = $entity->toArray();
+        if (!isset($data['id']) || $data['id'] === null) {
+            $data['id'] = QuizId::generate()->value();
+        }
+        $quiz = Quiz::create($data);
+        return QuizEntity::fromArray($quiz->toArray());
     }
 
-    public function update(string $id, array $data): ?Quiz
+    public function update(QuizEntity $entity): ?QuizEntity
     {
-        $quiz = $this->findById($id);
+        $quiz = Quiz::find($entity->id);
         if (!$quiz) {
             return null;
         }
 
-        $quiz->update($data);
-        return $quiz;
+        $quiz->update($entity->toArray());
+        return QuizEntity::fromArray($quiz->toArray());
     }
 
     public function delete(string $id): bool
     {
-        $quiz = $this->findById($id);
+        $quiz = Quiz::find($id);
         if (!$quiz) {
             return false;
         }
