@@ -15,8 +15,14 @@ use App\Http\Controllers\QuizController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::middleware('auth.supabase')->group(function () {
+    // 認証が必要なAPIルート
+    Route::get('/user', function (Request $request) {
+        return response()->json([
+            'user' => $request->get('user')
+        ]);
+    });
 
-Route::apiResource('quizzes', QuizController::class);
+    // 他の保護されたルートをここに追加
+    Route::apiResource('quizzes', QuizController::class);
+});
